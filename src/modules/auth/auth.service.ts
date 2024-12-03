@@ -7,6 +7,7 @@ import { JwtService } from "./services/jwt.service";
 import { LoginDto } from "./dtos/login.dto";
 import { RegisterDto } from "./dtos/register.dto";
 import { User } from "../user/entity/user.entity";
+import { LoginResponse } from "./types/login.response";
 
 @Injectable()
 export class AuthService {
@@ -24,7 +25,7 @@ export class AuthService {
     "DEFAULT_TOKEN_EXPIRATION"
   );
 
-  async login(loginDto: LoginDto): Promise<{ access_token: string }> {
+  async login(loginDto: LoginDto): Promise<LoginResponse> {
     const { email, password, rememberMe } = loginDto;
 
     const user = await this.userService.getUserByEmail(email);
@@ -54,16 +55,15 @@ export class AuthService {
       : this.DEFAULT_TOKEN_EXPIRATION;
 
     const accessToken = this.jwtService.sign(tokenPayload, expiresIn);
+    const userInfo = { email: user.email, id: user.id };
 
-    return { access_token: accessToken };
+    return { accessToken, user: userInfo };
   }
 
   async register(registerDto: RegisterDto): Promise<User> {
     const { email, password } = registerDto;
 
     const userExists = await this.userService.getUserByEmail(email);
-
-    console.log(userExists);
 
     if (userExists) {
       throw new HttpException("User already exists", HttpStatus.BAD_REQUEST);
