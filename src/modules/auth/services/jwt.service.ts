@@ -10,12 +10,12 @@ export class JwtService {
     this.configService.get<string>("JWT_SECRET_KEY");
 
   sign(payload: object, expiresIn: string): string {
-    return jwt.sign(payload, this.JWT_SECRET_KEY, { expiresIn });
+    return jwt.sign(payload, this.JWT_SECRET_KEY ?? "secret", { expiresIn });
   }
 
   verify(token: string): object | string {
     try {
-      return jwt.verify(token, this.JWT_SECRET_KEY);
+      return jwt.verify(token, this.JWT_SECRET_KEY ?? "secret");
     } catch (err) {
       throw new Error("Invalid or expired token");
     }

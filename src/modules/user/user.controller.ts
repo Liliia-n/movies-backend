@@ -12,15 +12,15 @@ import { AuthGuard } from "../auth/guards/auth.guard";
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get(":id")
-  async getUserById(@Param("id") id: string): Promise<User> {
-    return this.userService.getUserById(id);
-  }
-
   @UseGuards(AuthGuard)
   @Get("movies")
   async getUserMovies(@GetUser("sub") id: string): Promise<Movie[]> {
     return this.userService.getUserMovies(id);
+  }
+
+  @Get(":id")
+  async getUserInfo(@Param("id") userId: string): Promise<User | null> {
+    return this.userService.getUserById(userId);
   }
 
   @Post()

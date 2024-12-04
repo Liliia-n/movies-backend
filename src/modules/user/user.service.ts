@@ -1,10 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 
-import { User } from "./entity/user.entity";
-import { CreateUserDto } from "./dtos/create-user.dto";
 import { Movie } from "../movies/entity/movie.entity";
+import { CreateUserDto } from "./dtos/create-user.dto";
+import { User } from "./entity/user.entity";
 
 @Injectable()
 export class UserService {
@@ -21,7 +21,7 @@ export class UserService {
     return user;
   }
 
-  async getUserById(id: string): Promise<User> {
+  async getUserById(id: string): Promise<User | null> {
     const user = await this.userRepository.findOneBy({
       id,
     });
@@ -29,7 +29,7 @@ export class UserService {
     return user;
   }
 
-  async getUserByEmail(email: string): Promise<User> {
+  async getUserByEmail(email: string): Promise<User | null> {
     const user = await this.userRepository.findOneBy({
       email,
     });
@@ -43,10 +43,6 @@ export class UserService {
       relations: ["movies"],
     });
 
-    if (!user) {
-      throw new HttpException("User not found", HttpStatus.NOT_FOUND);
-    }
-
-    return user.movies;
+    return user?.movies || [];
   }
 }

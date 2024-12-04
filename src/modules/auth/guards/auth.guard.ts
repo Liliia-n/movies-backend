@@ -8,6 +8,8 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { Request } from "express";
 
+const REQUEST_USER_KEY = "user";
+
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
@@ -28,7 +30,7 @@ export class AuthGuard implements CanActivate {
         secret: this.configService.get("JWT_SECRET_KEY"),
       });
 
-      request["user"] = payload;
+      request[REQUEST_USER_KEY] = payload;
     } catch {
       throw new UnauthorizedException();
     }

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ConfigService } from "@nestjs/config";
 import { Repository } from "typeorm";
@@ -63,7 +67,7 @@ export class MoviesService {
     }
 
     if (movie.user.id !== userId) {
-      throw new NotFoundException(`Movie can only be updated by its owner`);
+      throw new BadRequestException(`Movie can only be updated by its owner`);
     }
 
     Object.assign(movie, updateMovieDto);

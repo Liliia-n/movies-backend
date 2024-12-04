@@ -1,7 +1,8 @@
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";
+import { IUserPayload } from "src/modules/user/types/user.type";
 
 export const GetUser = createParamDecorator(
-  (data: keyof any | undefined, ctx: ExecutionContext) => {
+  (data: keyof IUserPayload, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
     const user = request.user;
 
