@@ -55,9 +55,8 @@ export class AuthService {
       : this.DEFAULT_TOKEN_EXPIRATION;
 
     const accessToken = this.jwtService.sign(tokenPayload, expiresIn);
-    const userInfo = { email: user.email, id: user.id };
 
-    return { accessToken, user: userInfo };
+    return { accessToken };
   }
 
   async register(registerDto: RegisterDto): Promise<User> {

@@ -1,19 +1,23 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { ConfigService } from "@nestjs/config";
 import { Repository } from "typeorm";
 
-import { UserService } from "../user/user.service";
-import { Movie } from "./entity/movie.entity";
+import { FilesService } from "../files/files.service";
 import { CreateMovieDto } from "./dtos/create-movie.dto";
 import { UpdateMovieDto } from "./dtos/update-movie.dto";
+import { Movie } from "./entity/movie.entity";
 
 @Injectable()
 export class MoviesService {
   constructor(
     @InjectRepository(Movie)
     private readonly movieRepository: Repository<Movie>,
-    private readonly userService: UserService
+    private readonly fileService: FilesService,
+    private readonly configService: ConfigService
   ) {}
+
+  private readonly SERVER_URL = this.configService.get<string>("SERVER_URL");
 
   async getMovieById(id: string): Promise<Movie> {
     const movie = await this.movieRepository.findOneBy({
@@ -27,12 +31,19 @@ export class MoviesService {
     return movie;
   }
 
-  async createMovie(createMovieDto: CreateMovieDto): Promise<Movie> {
-    const user = await this.userService.getUserById(createMovieDto.userId);
+  async createMovie(
+    createMovieDto: CreateMovieDto,
+    movieImg: Express.Multer.File,
+    userId: string
+  ): Promise<Movie> {
+    const imgName = await this.fileService.createFile(movieImg);
 
     const movie = this.movieRepository.create({
       ...createMovieDto,
-      user,
+      user: {
+        id: userId,
+      },
+      image: `${this.SERVER_URL}/${imgName}`,
     });
 
     return this.movieRepository.save(movie);
@@ -40,7 +51,8 @@ export class MoviesService {
 
   async updateMovie(
     id: string,
-    updateMovieDto: UpdateMovieDto
+    updateMovieDto: UpdateMovieDto,
+    userId: string
   ): Promise<Movie> {
     const movie = await this.movieRepository.findOneBy({
       id,
@@ -48,6 +60,10 @@ export class MoviesService {
 
     if (!movie) {
       throw new NotFoundException(`Movie with ID ${id} not found`);
+    }
+
+    if (movie.user.id !== userId) {
+      throw new NotFoundException(`Movie can only be updated by its owner`);
     }
 
     Object.assign(movie, updateMovieDto);

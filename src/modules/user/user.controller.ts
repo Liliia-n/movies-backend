@@ -1,9 +1,12 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
+
+import { GetUser } from "src/decorators/get-user.decorator";
 
 import { UserService } from "./user.service";
 import { CreateUserDto } from "./dtos/create-user.dto";
 import { User } from "./entity/user.entity";
 import { Movie } from "../movies/entity/movie.entity";
+import { AuthGuard } from "../auth/guards/auth.guard";
 
 @Controller("user")
 export class UserController {
@@ -14,8 +17,9 @@ export class UserController {
     return this.userService.getUserById(id);
   }
 
-  @Get(":id/movies")
-  async getUserMovies(@Param("id") id: string): Promise<Movie[]> {
+  @UseGuards(AuthGuard)
+  @Get("movies")
+  async getUserMovies(@GetUser("sub") id: string): Promise<Movie[]> {
     return this.userService.getUserMovies(id);
   }
 
