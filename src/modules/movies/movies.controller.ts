@@ -1,9 +1,8 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
-  HttpException,
-  HttpStatus,
   Param,
   Patch,
   Post,
@@ -38,18 +37,27 @@ export class MoviesController {
     @GetUser("sub") userId: string
   ): Promise<Movie> {
     if (!movieImg) {
-      throw new HttpException("Image is required", HttpStatus.BAD_REQUEST);
+      throw new BadRequestException("Image is required");
     }
 
     return this.moviesService.createMovie(createMovieDto, movieImg, userId);
   }
 
   @Patch(":id")
+  @UseInterceptors(FileInterceptor("movieImg"))
   async updateMovie(
     @Param("id") id: string,
+    @UploadedFile() movieImg: Express.Multer.File,
     @Body() updateMovieDto: UpdateMovieDto,
     @GetUser("sub") userId: string
   ): Promise<Movie> {
-    return this.moviesService.updateMovie(id, updateMovieDto, userId);
+    return this.moviesService.updateMovie(
+      id,
+      {
+        ...updateMovieDto,
+        image: movieImg ?? undefined,
+      },
+      userId
+    );
   }
 }

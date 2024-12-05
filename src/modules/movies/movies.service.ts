@@ -11,6 +11,7 @@ import { FilesService } from "../files/files.service";
 import { CreateMovieDto } from "./dtos/create-movie.dto";
 import { UpdateMovieDto } from "./dtos/update-movie.dto";
 import { Movie } from "./entity/movie.entity";
+import { IUpdateMovie } from "./types/update.type";
 
 @Injectable()
 export class MoviesService {
@@ -58,8 +59,22 @@ export class MoviesService {
     updateMovieDto: UpdateMovieDto,
     userId: string
   ): Promise<Movie> {
-    const movie = await this.movieRepository.findOneBy({
-      id,
+    const { image } = updateMovieDto;
+
+    const updateBody: IUpdateMovie = {
+      title: updateMovieDto.title,
+      publishingYear: updateMovieDto.publishingYear,
+    };
+
+    if (image) {
+      const name = await this.fileService.createFile(image);
+      const imgName = `${this.SERVER_URL}/${name}`;
+      updateBody.image = imgName;
+    }
+
+    const movie = await this.movieRepository.findOne({
+      where: { id },
+      relations: ["user"],
     });
 
     if (!movie) {
@@ -70,7 +85,7 @@ export class MoviesService {
       throw new BadRequestException(`Movie can only be updated by its owner`);
     }
 
-    Object.assign(movie, updateMovieDto);
+    Object.assign(movie, updateBody);
 
     return this.movieRepository.save(movie);
   }

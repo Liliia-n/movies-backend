@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import { IsInt, IsOptional, IsString, Max, MaxLength } from "class-validator";
 
 export class UpdateMovieDto {
@@ -8,10 +9,10 @@ export class UpdateMovieDto {
 
   @IsOptional()
   @IsInt()
+  @Type(() => Number)
   @Max(new Date().getFullYear())
   publishingYear?: number;
 
   @IsOptional()
-  @IsString()
-  image?: string;
+  image?: Express.Multer.File;
 }

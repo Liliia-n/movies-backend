@@ -25,4 +25,21 @@ export class FilesService {
       );
     }
   }
+
+  async deleteFile(filename: string): Promise<void> {
+    try {
+      const filePath = path.resolve(__dirname, "..", "..", "uploads", filename);
+
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+
+        return;
+      }
+    } catch (err) {
+      throw new HttpException(
+        "Something went wrong while deleting the file",
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 }
