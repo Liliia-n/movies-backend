@@ -1,4 +1,4 @@
-name: CI/CD Staging
+name: CI/CD Staging |
 on:
   push:
     branches: [master]
